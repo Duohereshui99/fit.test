@@ -190,11 +190,10 @@ def compute_gamma_for_theta(theta, m1, m2, z1, z2, Rc0, V0, a0, r0, P0, beta2, b
 # Gamma(theta)
     return Gamma
 
-def Model(m1, m2, z1, z2, Rc0, V0, a0, r0, P0, beta2, beta4, beta2tilde, beta4tilde, n_theta):
-
-    import time
+def Model(m1, m2, z1, z2, Rc0, V0, a0, r0, P0, beta2, beta4, beta2tilde, beta4tilde, n_theta=30):
 
     theta_grid = np.linspace(0, np.pi/2, n_theta)
+    sin_theta = np.sin(theta_grid)
 
     gamma_list = []
     for idx, theta in enumerate(theta_grid, 1):
@@ -205,15 +204,19 @@ def Model(m1, m2, z1, z2, Rc0, V0, a0, r0, P0, beta2, beta4, beta2tilde, beta4ti
         gamma_list.append(gamma)
 
     Gamma_array = np.array(gamma_list)
+    integrand = Gamma_array * sin_theta
+    Gamma_total = simpson(integrand, x=theta_grid)
 
 
-# Gamma(theta)
-    return theta_grid, Gamma_array
+# Gamma(theta) and Gamma
+    return theta_grid, Gamma_array, Gamma_total
 
 
 
-theta_arr, Gamma_arr = Model(m1, m2, z1, z2, Rc0, V0, a0, r0, P0, beta2, beta4, beta2tilde, beta4tilde, n_theta=30)
+theta_arr, Gamma_arr, Gamma_ave = Model(m1, m2, z1, z2, Rc0, V0, a0, r0, P0, beta2, beta4, beta2tilde, beta4tilde)
 
+print(f"Total width: {Gamma_ave:.3e} MeV")
+print(hbarc*np.log(2)/Gamma_ave*1/3*1e-23)
 plt.plot(theta_arr, Gamma_arr)
 plt.xlabel("θ (rad)")
 plt.ylabel("Γ (MeV)")
